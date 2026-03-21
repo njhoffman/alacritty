@@ -57,7 +57,7 @@ use crate::display::color::Rgb;
 use crate::display::hint::HintMatch;
 use crate::display::window::{ImeInhibitor, Window};
 use crate::display::{Display, Preedit, SizeInfo};
-use crate::input::{self, ActionContext as _, FONT_SIZE_STEP};
+use crate::input::{self, ActionContext as _};
 use crate::logging::{LOG_TARGET_CONFIG, LOG_TARGET_WINIT};
 use crate::message_bar::{Message, MessageBuffer};
 #[cfg(unix)]
@@ -1732,7 +1732,7 @@ impl TouchZoom {
     }
 
     /// Get slot distance change since last update.
-    pub fn font_delta(&mut self, slot: TouchEvent) -> f32 {
+    pub fn font_delta(&mut self, slot: TouchEvent, size_step: f32) -> f32 {
         let old_distance = self.distance();
 
         // Update touch slots.
@@ -1742,9 +1742,9 @@ impl TouchZoom {
             self.slots.1 = slot;
         }
 
-        // Calculate font change in `FONT_SIZE_STEP` increments.
+        // Calculate font change in `size_step` increments.
         let delta = (self.distance() - old_distance) * TOUCH_ZOOM_FACTOR + self.fractions;
-        let font_delta = (delta.abs() / FONT_SIZE_STEP).floor() * FONT_SIZE_STEP * delta.signum();
+        let font_delta = (delta.abs() / size_step).floor() * size_step * delta.signum();
         self.fractions = delta - font_delta;
 
         font_delta

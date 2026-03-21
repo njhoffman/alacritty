@@ -40,6 +40,9 @@ pub struct Font {
     /// Font size in points.
     size: Size,
 
+    /// Font size change step in points.
+    pub size_step: SizeStep,
+
     /// Whether to use the built-in font for box drawing characters.
     pub builtin_box_drawing: bool,
 }
@@ -88,6 +91,7 @@ impl Default for Font {
             normal: Default::default(),
             bold: Default::default(),
             size: Default::default(),
+            size_step: Default::default(),
         }
     }
 }
@@ -170,5 +174,58 @@ impl Serialize for Size {
         S: Serializer,
     {
         serializer.serialize_f32(self.0.as_pt())
+    }
+}
+
+/// Font size change step in points.
+#[derive(SerdeReplace, Debug, Clone, PartialEq)]
+pub struct SizeStep(f32);
+
+impl SizeStep {
+    pub fn as_f32(&self) -> f32 {
+        self.0
+    }
+}
+
+impl Default for SizeStep {
+    fn default() -> Self {
+        Self(1.0)
+    }
+}
+
+impl Eq for SizeStep {}
+
+impl<'de> Deserialize<'de> for SizeStep {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct NumVisitor;
+        impl Visitor<'_> for NumVisitor {
+            type Value = SizeStep;
+
+            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str("f64 or i64")
+            }
+
+            fn visit_f64<E: de::Error>(self, value: f64) -> Result<Self::Value, E> {
+                Ok(SizeStep(value as f32))
+            }
+
+            fn visit_i64<E: de::Error>(self, value: i64) -> Result<Self::Value, E> {
+                Ok(SizeStep(value as f32))
+            }
+        }
+
+        deserializer.deserialize_any(NumVisitor)
+    }
+}
+
+impl Serialize for SizeStep {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_f32(self.0)
     }
 }
