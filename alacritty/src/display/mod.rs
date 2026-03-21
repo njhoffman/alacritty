@@ -385,6 +385,9 @@ pub struct Display {
     /// Font size used by the window.
     pub font_size: FontSize,
 
+    /// Transient notification text overlaid on the terminal.
+    pub notification: Option<String>,
+
     // Mouse point position when highlighting hints.
     hint_mouse_point: Option<Point>,
 
@@ -528,6 +531,7 @@ impl Display {
             hint_state,
             size_info,
             font_size,
+            notification: None,
             window,
             pending_renderer_update: Default::default(),
             vi_highlighted_hint_age: Default::default(),
@@ -1009,6 +1013,7 @@ impl Display {
         }
 
         self.draw_render_timer(config);
+        self.draw_notification(config);
 
         // Draw hyperlink uri preview.
         if has_highlighted_hint {
@@ -1344,6 +1349,29 @@ impl Display {
 
         let glyph_cache = &mut self.glyph_cache;
         self.renderer.draw_string(point, fg, bg, timing.chars(), &self.size_info, glyph_cache);
+    }
+
+    /// Draw transient notification overlay at top-right.
+    #[inline(never)]
+    fn draw_notification(&mut self, config: &UiConfig) {
+        let text = match &self.notification {
+            Some(text) => text,
+            None => return,
+        };
+
+        let num_cols = self.size_info.columns();
+        let col = Column(num_cols.saturating_sub(text.len()));
+        let point = Point::new(0, col);
+        let fg = config.colors.footer_bar_foreground();
+        let bg = config.colors.footer_bar_background();
+
+        // Damage notification area for current and next frame.
+        let damage = LineDamageBounds::new(point.line, point.column.0, num_cols - 1);
+        self.damage_tracker.frame().damage_line(damage);
+        self.damage_tracker.next_frame().damage_line(damage);
+
+        let glyph_cache = &mut self.glyph_cache;
+        self.renderer.draw_string(point, fg, bg, text.chars(), &self.size_info, glyph_cache);
     }
 
     /// Draw an indicator for the position of a line in history.

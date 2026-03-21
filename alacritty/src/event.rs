@@ -556,6 +556,7 @@ pub enum EventType {
     #[cfg(unix)]
     Shutdown,
     Frame,
+    DismissNotification,
 }
 
 impl From<TerminalEvent> for EventType {
@@ -919,11 +920,12 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
     }
 
     fn change_font_size(&mut self, delta: f32) {
-        // Round to pick integral px steps, since fonts look better on them.
-        let new_size = self.display.font_size.as_px().round() + delta;
-        self.display.font_size = FontSize::from_px(new_size);
+        // Delta is in points, so work in points throughout.
+        self.display.font_size = FontSize::new(self.display.font_size.as_pt() + delta);
         let font = self.config.font.clone().with_size(self.display.font_size);
         self.display.pending_update.set_font(font);
+
+        self.show_font_notification();
     }
 
     fn reset_font_size(&mut self) {
@@ -932,6 +934,8 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         self.display
             .pending_update
             .set_font(self.config.font.clone().with_size(self.display.font_size));
+
+        self.show_font_notification();
     }
 
     #[inline]
@@ -1706,6 +1710,22 @@ impl<'a, N: Notify + 'a, T: EventListener> ActionContext<'a, N, T> {
     }
 }
 
+impl<'a, N: Notify + 'a, T: EventListener> ActionContext<'a, N, T> {
+    /// Show a transient notification with the current font name and size.
+    fn show_font_notification(&mut self) {
+        let family = &self.config.font.normal().family;
+        let size_pt = self.display.font_size.as_pt();
+        self.display.notification = Some(format!("{family} {size_pt:.1}pt"));
+        *self.dirty = true;
+
+        let window_id = self.display.window.id();
+        let timer_id = TimerId::new(Topic::Notification, window_id);
+        self.scheduler.unschedule(timer_id);
+        let event = Event::new(EventType::DismissNotification, window_id);
+        self.scheduler.schedule(event, Duration::from_secs(1), false, timer_id);
+    }
+}
+
 /// Identified purpose of the touch input.
 #[derive(Default, Debug)]
 pub enum TouchPurpose {
@@ -1857,6 +1877,10 @@ impl input::Processor<EventProxy, ActionContext<'_, Notifier, EventProxy>> {
                     self.ctx.scheduler.unschedule(timer_id);
                     *self.ctx.cursor_blink_timed_out = true;
                     self.ctx.display.cursor_hidden = false;
+                    *self.ctx.dirty = true;
+                },
+                EventType::DismissNotification => {
+                    self.ctx.display.notification = None;
                     *self.ctx.dirty = true;
                 },
                 // Add message only if it's not already queued.
