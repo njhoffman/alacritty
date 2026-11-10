@@ -556,6 +556,8 @@ pub enum EventType {
     #[cfg(unix)]
     Shutdown,
     Frame,
+    /// Show a transient notification for the given duration.
+    Notification(String, Duration),
     DismissNotification,
 }
 
@@ -1715,14 +1717,19 @@ impl<'a, N: Notify + 'a, T: EventListener> ActionContext<'a, N, T> {
     fn show_font_notification(&mut self) {
         let family = &self.config.font.normal().family;
         let size_pt = self.display.font_size.as_pt();
-        self.display.notification = Some(format!("{family} {size_pt:.1}pt"));
+        self.show_notification(format!("{family} {size_pt:.1}pt"), Duration::from_secs(1));
+    }
+
+    /// Show a transient notification, replacing any shown one and restarting its timer.
+    fn show_notification(&mut self, text: String, duration: Duration) {
+        self.display.notification = Some(text);
         *self.dirty = true;
 
         let window_id = self.display.window.id();
         let timer_id = TimerId::new(Topic::Notification, window_id);
         self.scheduler.unschedule(timer_id);
         let event = Event::new(EventType::DismissNotification, window_id);
-        self.scheduler.schedule(event, Duration::from_secs(1), false, timer_id);
+        self.scheduler.schedule(event, duration, false, timer_id);
     }
 }
 
@@ -1878,6 +1885,9 @@ impl input::Processor<EventProxy, ActionContext<'_, Notifier, EventProxy>> {
                     *self.ctx.cursor_blink_timed_out = true;
                     self.ctx.display.cursor_hidden = false;
                     *self.ctx.dirty = true;
+                },
+                EventType::Notification(text, duration) => {
+                    self.ctx.show_notification(text, duration);
                 },
                 EventType::DismissNotification => {
                     self.ctx.display.notification = None;

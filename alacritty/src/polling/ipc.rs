@@ -7,6 +7,7 @@ use std::net::Shutdown;
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::Duration;
 use std::{env, fs};
 
 use log::{error, warn};
@@ -83,6 +84,13 @@ impl IpcListener {
                 let window_id =
                     config.window_id.and_then(|id| u64::try_from(id).ok()).map(WindowId::from);
                 let event = Event::new(EventType::IpcGetConfig(Arc::new(stream)), window_id);
+                let _ = self.event_proxy.send_event(event);
+            },
+            SocketMessage::Notify(notify) => {
+                let window_id =
+                    notify.window_id.and_then(|id| u64::try_from(id).ok()).map(WindowId::from);
+                let duration = Duration::from_millis(notify.duration);
+                let event = Event::new(EventType::Notification(notify.text, duration), window_id);
                 let _ = self.event_proxy.send_event(event);
             },
         }

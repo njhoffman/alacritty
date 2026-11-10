@@ -263,6 +263,9 @@ pub enum SocketMessage {
 
     /// Read runtime Alacritty configuration.
     GetConfig(IpcGetConfig),
+
+    /// Show a transient notification in the top-right corner of a window.
+    Notify(IpcNotify),
 }
 
 /// Migrate the configuration file.
@@ -350,6 +353,25 @@ pub struct IpcGetConfig {
     /// Use `-1` to get the global config.
     #[clap(short, long, allow_hyphen_values = true, env = "ALACRITTY_WINDOW_ID")]
     pub window_id: Option<i128>,
+}
+
+/// Parameters to the `notify` IPC subcommand.
+#[cfg(unix)]
+#[derive(Args, Serialize, Deserialize, Default, Debug, Clone, PartialEq, Eq)]
+pub struct IpcNotify {
+    /// Notification text.
+    #[clap(required = true, value_name = "TEXT")]
+    pub text: String,
+
+    /// Window ID to show the notification in.
+    ///
+    /// Use `-1` to show it in all windows.
+    #[clap(short, long, allow_hyphen_values = true, env = "ALACRITTY_WINDOW_ID")]
+    pub window_id: Option<i128>,
+
+    /// How long to show the notification, in milliseconds.
+    #[clap(short, long, default_value_t = 1000, value_name = "MS")]
+    pub duration: u64,
 }
 
 /// Parsed CLI config overrides.
@@ -532,6 +554,53 @@ mod tests {
     fn invalid_hex_to_decimal() {
         let value = parse_hex_or_decimal("0xa0xx0d");
         assert_eq!(value, None);
+    }
+
+    #[cfg(unix)]
+    fn parse_notify(args: &[&str]) -> IpcNotify {
+        let args = ["alacritty", "msg", "notify"].iter().chain(args);
+        match Options::try_parse_from(args).unwrap().subcommands {
+            Some(Subcommands::Msg(MessageOptions {
+                message: SocketMessage::Notify(notify),
+                ..
+            })) => notify,
+            other => panic!("expected msg notify, got {other:?}"),
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn notify_defaults_to_one_second() {
+        let notify = parse_notify(&["opacity 0.84"]);
+        assert_eq!(notify.text, "opacity 0.84");
+        assert_eq!(notify.duration, 1000);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn notify_window_and_duration() {
+        let notify = parse_notify(&["-w", "-1", "-d", "250", "picom 0.50"]);
+        assert_eq!(notify.window_id, Some(-1));
+        assert_eq!(notify.duration, 250);
+        assert_eq!(notify.text, "picom 0.50");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn notify_requires_text() {
+        assert!(Options::try_parse_from(["alacritty", "msg", "notify"]).is_err());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn notify_survives_the_socket_encoding() {
+        let message = SocketMessage::Notify(IpcNotify {
+            text: "opacity 0.84".into(),
+            window_id: Some(42),
+            duration: 500,
+        });
+        let json = serde_json::to_string(&message).unwrap();
+        assert_eq!(serde_json::from_str::<SocketMessage>(&json).unwrap(), message);
     }
 
     #[cfg(target_os = "linux")]

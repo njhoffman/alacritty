@@ -43,12 +43,13 @@ complete -c alacritty -n "__fish_alacritty_needs_command" -s V -l version -d 'Pr
 complete -c alacritty -n "__fish_alacritty_needs_command" -f -a "msg" -d 'Send a message to the Alacritty socket'
 complete -c alacritty -n "__fish_alacritty_needs_command" -f -a "migrate" -d 'Migrate the configuration file'
 complete -c alacritty -n "__fish_alacritty_needs_command" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
-complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config help" -s s -l socket -d 'IPC socket connection path override' -r -F
-complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config help" -s h -l help -d 'Print help'
-complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config help" -f -a "create-window" -d 'Create a new window in the same Alacritty process'
-complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config help" -f -a "config" -d 'Update the Alacritty configuration'
-complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config help" -f -a "get-config" -d 'Read runtime Alacritty configuration'
-complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config notify help" -s s -l socket -d 'IPC socket connection path override' -r -F
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config notify help" -s h -l help -d 'Print help'
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config notify help" -f -a "create-window" -d 'Create a new window in the same Alacritty process'
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config notify help" -f -a "config" -d 'Update the Alacritty configuration'
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config notify help" -f -a "get-config" -d 'Read runtime Alacritty configuration'
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config notify help" -f -a "notify" -d 'Show a transient notification in the top-right corner of a window'
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and not __fish_seen_subcommand_from create-window config get-config notify help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from create-window" -l working-directory -d 'Start the shell in the specified working directory' -r -F
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from create-window" -s e -l command -d 'Command and args to execute (must be last argument)' -r
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from create-window" -s T -l title -d 'Defines the window title [default: Alacritty]' -r
@@ -61,9 +62,13 @@ complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from config" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from get-config" -s w -l window-id -d 'Window ID for the config request' -r
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from get-config" -s h -l help -d 'Print help (see more with \'--help\')'
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from notify" -s w -l window-id -d 'Window ID to show the notification in' -r
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from notify" -s d -l duration -d 'How long to show the notification, in milliseconds' -r
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from notify" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from help" -f -a "create-window" -d 'Create a new window in the same Alacritty process'
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from help" -f -a "config" -d 'Update the Alacritty configuration'
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from help" -f -a "get-config" -d 'Read runtime Alacritty configuration'
+complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from help" -f -a "notify" -d 'Show a transient notification in the top-right corner of a window'
 complete -c alacritty -n "__fish_alacritty_using_subcommand msg; and __fish_seen_subcommand_from help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
 complete -c alacritty -n "__fish_alacritty_using_subcommand migrate" -s c -l config-file -d 'Path to the configuration file' -r -F
 complete -c alacritty -n "__fish_alacritty_using_subcommand migrate" -s d -l dry-run -d 'Only output TOML config to STDOUT'
@@ -77,3 +82,4 @@ complete -c alacritty -n "__fish_alacritty_using_subcommand help; and not __fish
 complete -c alacritty -n "__fish_alacritty_using_subcommand help; and __fish_seen_subcommand_from msg" -f -a "create-window" -d 'Create a new window in the same Alacritty process'
 complete -c alacritty -n "__fish_alacritty_using_subcommand help; and __fish_seen_subcommand_from msg" -f -a "config" -d 'Update the Alacritty configuration'
 complete -c alacritty -n "__fish_alacritty_using_subcommand help; and __fish_seen_subcommand_from msg" -f -a "get-config" -d 'Read runtime Alacritty configuration'
+complete -c alacritty -n "__fish_alacritty_using_subcommand help; and __fish_seen_subcommand_from msg" -f -a "notify" -d 'Show a transient notification in the top-right corner of a window'

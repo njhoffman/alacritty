@@ -95,6 +95,17 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help (see more with '\''--help'\'')]' \
 && ret=0
 ;;
+(notify)
+_arguments "${_arguments_options[@]}" : \
+'-w+[Window ID to show the notification in]:WINDOW_ID:_default' \
+'--window-id=[Window ID to show the notification in]:WINDOW_ID:_default' \
+'-d+[How long to show the notification, in milliseconds]:MS:_default' \
+'--duration=[How long to show the notification, in milliseconds]:MS:_default' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+':text -- Notification text:_default' \
+&& ret=0
+;;
 (help)
 _arguments "${_arguments_options[@]}" : \
 ":: :_alacritty__msg__help_commands" \
@@ -116,6 +127,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (get-config)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(notify)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -182,6 +197,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(notify)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
         esac
     ;;
 esac
@@ -237,6 +256,7 @@ _alacritty__help__msg_commands() {
 'create-window:Create a new window in the same Alacritty process' \
 'config:Update the Alacritty configuration' \
 'get-config:Read runtime Alacritty configuration' \
+'notify:Show a transient notification in the top-right corner of a window' \
     )
     _describe -t commands 'alacritty help msg commands' commands "$@"
 }
@@ -255,6 +275,11 @@ _alacritty__help__msg__get-config_commands() {
     local commands; commands=()
     _describe -t commands 'alacritty help msg get-config commands' commands "$@"
 }
+(( $+functions[_alacritty__help__msg__notify_commands] )) ||
+_alacritty__help__msg__notify_commands() {
+    local commands; commands=()
+    _describe -t commands 'alacritty help msg notify commands' commands "$@"
+}
 (( $+functions[_alacritty__migrate_commands] )) ||
 _alacritty__migrate_commands() {
     local commands; commands=()
@@ -266,6 +291,7 @@ _alacritty__msg_commands() {
 'create-window:Create a new window in the same Alacritty process' \
 'config:Update the Alacritty configuration' \
 'get-config:Read runtime Alacritty configuration' \
+'notify:Show a transient notification in the top-right corner of a window' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'alacritty msg commands' commands "$@"
@@ -291,6 +317,7 @@ _alacritty__msg__help_commands() {
 'create-window:Create a new window in the same Alacritty process' \
 'config:Update the Alacritty configuration' \
 'get-config:Read runtime Alacritty configuration' \
+'notify:Show a transient notification in the top-right corner of a window' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'alacritty msg help commands' commands "$@"
@@ -314,6 +341,16 @@ _alacritty__msg__help__get-config_commands() {
 _alacritty__msg__help__help_commands() {
     local commands; commands=()
     _describe -t commands 'alacritty msg help help commands' commands "$@"
+}
+(( $+functions[_alacritty__msg__help__notify_commands] )) ||
+_alacritty__msg__help__notify_commands() {
+    local commands; commands=()
+    _describe -t commands 'alacritty msg help notify commands' commands "$@"
+}
+(( $+functions[_alacritty__msg__notify_commands] )) ||
+_alacritty__msg__notify_commands() {
+    local commands; commands=()
+    _describe -t commands 'alacritty msg notify commands' commands "$@"
 }
 
 if [ "$funcstack[1]" = "_alacritty" ]; then

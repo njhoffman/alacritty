@@ -78,6 +78,33 @@ making it possible to control Alacritty without directly accessing it.
 
 			Default: _$ALACRITTY_WINDOW_ID_
 
+*notify*
+
+	Show a transient notification in the top-right corner of a window,
+	replacing any notification it shows.
+
+	*ARGS*
+		*<TEXT>*
+
+			Notification text.
+
+			Example: _alacritty msg notify 'opacity 0.84'_
+
+	*OPTIONS*
+		*-w, --window-id* _<WINDOW_ID>_
+
+			Window ID to show the notification in.
+
+			Use _-1_ to show it in all windows.
+
+			Default: _$ALACRITTY_WINDOW_ID_
+
+		*-d, --duration* _<MS>_
+
+			How long to show the notification, in milliseconds.
+
+			Default: _1000_
+
 *get-config*
 
 	Read runtime Alacritty configuration.
